@@ -1,29 +1,19 @@
 # Refer UG835.
 # URL: https://docs.xilinx.com/v/u/ja-JP/ug835-vivado-tcl-commands
 
-
+# Variables. Change these variables below depends on your projects.
 set origin_dir "."
 set project_name "Project_Name"
-#set board_part [get_board_parts -quiet -latest_file_version "*zc706*"]
 set target_part "xcau25p-ffvb676-2-i"
-set rtl_folder "src"
+set rtl_src_folder "src"
+set ip_repository "src/ip"
 
 
-create_project $origin_dir $project_name
+#####################################
+### Do not change below from here.###
+##################################### 
 
-# target setting
-# if{[info exists ::target_part]}{
-#     puts "$target_part"
-#     puts " is selected."
-# } else {
-#     puts "ERROR: Please set target_part."
-#     return 1
-# }
-
-# project setting
-set_property "default_lib"        "xil_defaultlib" [current_project]
-set_property "simulator_language" "Mixed"          [current_project]
-set_property "target_language"    "verilog"        [current_project]
+create_project $project_name $origin_dir/$project_name
 
 # Set the directory path for the new project
 set proj_dir [get_property directory [current_project]]
@@ -65,12 +55,50 @@ if {[string equal [get_filesets -quiet sim_1] ""]} {
     create_fileset -simset sim_1
 }
 
-# add_files -fileset sources_1 
-add_files -fileset sources_1 src
+# RTL source and IP(.xci) adding process
+    # RTL source is being added
+    # check if folder exist or not 
+    if { [ file exists $rtl_src_folder ] == 1 } {
 
-set ips [glob src/*.xci]
-add_files -fileset sources_1 $ips
+        set rtl_list [glob -nocomplain $rtl_src_folder/*.{v,sv,vh}]
+
+        if { [string equal [lindex $rtl_list 0] ""] } {
+
+            puts "There is no RTL file in src directory.\n"
+
+        } else {
+
+            add_files -fileset sources_1 $rtl_src_folder
+            puts "rtl source(s) is/are added.\n"
+
+        }
+    } else {
+
+        puts "src is not found. Adding src is cancelled. \n"
+    }
+
+
+    # IP(.xci) is being added
+    if { [ file exists $ip_repository ] == 1 } {
+
+        set ip_list [glob -nocomplain $ip_repository/*.xci]
+
+        if {[string equal [lindex $ip_list 0] ""]} {
+
+            puts "There is no IP(.xci) file in src directory.\n"
+
+        } else {
+
+            foreach ip $ip_list {
+                add_files -fileset sources_1 $ip
+                puts "$ip is added.\n"
+            }
+        }
+    } else {
+
+        puts "IP folder doesn't exist.\n"
+    }
+
 
 update_ip_catalog
 
-# add 
