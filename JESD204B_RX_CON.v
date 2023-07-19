@@ -1,7 +1,7 @@
 module jesd204b_rx_con #(
     parameter DIV_DCLK   = 4,   // i_dclk = adc device clock freq / DIV_DCLK
     parameter FRAME_SIZE = 1, // frame size in byte. 
-    parameter FMLC_NUM   = 8,   // multi frame size. 
+    parameter FMLC_NUM   = 8   // multi frame size. 
 ) (
 
     // JESD204 protocol control wire
@@ -35,7 +35,7 @@ wire gtwiz_userclk_rx_reset_in; //
 wire gtwiz_reset_clk_freerun_in ;
 wire gtwiz_reset_all_in         ;
 wire gtwiz_reset_rx_done_out    ;
-wire [3 : 0] gtpowergood_out
+wire [3 : 0] gtpowergood_out;
 
 // user interface data
 wire [127:0]gtwiz_userdata_rx_out;
@@ -46,8 +46,8 @@ wire gtrefclk00_in; // 100MHz
     wire [3 : 0] rxcommadeten_in;
     wire [3 : 0] rxmcommaalignen_in;
     wire [3 : 0] rxpcommaalignen_in;
-    wire [3 : 0] rxbyteisaligned_out
-    wire [3 : 0] rxcommadet_out
+    wire [3 : 0] rxbyteisaligned_out;
+    wire [3 : 0] rxcommadet_out;
 
     wire [63 : 0] rxctrl0_out;
     wire [63 : 0] rxctrl1_out;
@@ -55,8 +55,8 @@ wire gtrefclk00_in; // 100MHz
     wire [31 : 0] rxctrl3_out;
 
 // user interface clock
-    wire [3 : 0] rxusrclk_in    // PCS clock
-    wire [3 : 0] rxusrclk2_in   // user logic clock
+    wire [3 : 0] rxusrclk_in  ;  // PCS clock
+    wire [3 : 0] rxusrclk2_in  ; // user logic clock
 
 
 // jesd204b core 
@@ -64,14 +64,6 @@ wire gtrefclk00_in; // 100MHz
     reg [10:0] fmlc_cnt;
 
 
-always @(posedge i_dclk) begin
-    if(fmlc_cnt == (FMLC_NUM/DIV_DCLK)
-        fmlc_multi_local_clock <= ~fmlc_multi_local_clock;
-
-    fmlc_cnt <= fmlc_cnt + 1;
-
-
-end
 
 
 

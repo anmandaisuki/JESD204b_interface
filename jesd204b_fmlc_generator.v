@@ -26,8 +26,9 @@ always @(posedge dclk ) begin
     if(sysref) begin
         fmlc_cnt_double <= 1;
         dclk_cnt        <= 1;
-        sysref          <= 1'b1;
+        sysref_done_flag          <= 1'b1;
     end else begin
+        sysref_done_flag <= 1'b0;
         dclk_cnt <= dclk_cnt + 1;
         if( dclk_cnt % (((JESD_K * JESD_F)/DCLK_DIV)/2) == 0) begin
             fmlc_cnt_double <= fmlc_cnt_double + 1;
