@@ -8,4 +8,4 @@ if exist "%PROJECTNAME%" (
     echo Vivado Project named %PROJECTNAME% does not exist. Recreating Project.....
 )
 
-vivado -mode batch -source src/create_project.tcl
+vivado -mode batch -source src/create_project.tcl -tclargs %PROJECTNAME%

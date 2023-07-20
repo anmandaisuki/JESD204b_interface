@@ -3,7 +3,7 @@
 
 # Variables. Change these variables below depends on your projects.
 set origin_dir "."
-set project_name "Project_Name"
+set project_name [lindex $argv 0]
 set target_part "xcau25p-ffvb676-2-i"
 
 set src_folder "src"
