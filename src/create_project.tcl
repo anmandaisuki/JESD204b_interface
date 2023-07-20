@@ -5,8 +5,12 @@
 set origin_dir "."
 set project_name "Project_Name"
 set target_part "xcau25p-ffvb676-2-i"
-set rtl_src_folder "src"
+
+set src_folder "src"
+set rtl_repository "src/rtl"
 set ip_repository "src/ip"
+set tb_repository "src/sim"
+set xdc_repository "src/constraint"
 
 
 #####################################
@@ -45,36 +49,37 @@ if {[string equal [get_filesets -quiet sources_1] ""]} {
     create_fileset -srcset sources_1
 }
 
-# constrs_1 is created if not existed.
-if {[string equal [get_filesets -quiet constrs_1] ""]} {
-    create_fileset -constrset constrs_1
-}
-
 # sim_1 is created if not existed.
 if {[string equal [get_filesets -quiet sim_1] ""]} {
     create_fileset -simset sim_1
 }
 
-# RTL source and IP(.xci) adding process
+# constrs_1 is created if not existed.
+if {[string equal [get_filesets -quiet constrs_1] ""]} {
+    create_fileset -constrset constrs_1
+}
+
+
+# Source adding process
     # RTL source is being added
     # check if folder exist or not 
-    if { [ file exists $rtl_src_folder ] == 1 } {
+    if { [ file exists $rtl_repository ] == 1 } {
 
-        set rtl_list [glob -nocomplain $rtl_src_folder/*.{v,sv,vh}]
+        set rtl_list [glob -nocomplain $rtl_repository/*.{v,sv,vh}]
 
         if { [string equal [lindex $rtl_list 0] ""] } {
 
-            puts "There is no RTL file in src directory.\n"
+            puts "\nRECREATING_PROCESSINFO  There is no RTL file in src directory.\n"
 
         } else {
 
-            add_files -fileset sources_1 $rtl_src_folder
-            puts "rtl source(s) is/are added.\n"
+            add_files -fileset sources_1 $rtl_repository
+            puts "\nRECREATING_PROCESSINFO  rtl source(s) is/are added.\n"
 
         }
     } else {
 
-        puts "src is not found. Adding src is cancelled. \n"
+        puts "\nRECREATING_PROCESSINFO  src is not found. Adding src is cancelled. \n"
     }
 
 
@@ -85,20 +90,68 @@ if {[string equal [get_filesets -quiet sim_1] ""]} {
 
         if {[string equal [lindex $ip_list 0] ""]} {
 
-            puts "There is no IP(.xci) file in src directory.\n"
+            puts "\nRECREATING_PROCESSINFO  There is no IP(.xci) file in src directory.\n"
 
         } else {
 
             foreach ip $ip_list {
                 add_files -fileset sources_1 $ip
-                puts "$ip is added.\n"
+                puts "\nRECREATING_PROCESSINFO  $ip is added.\n"
             }
         }
     } else {
 
-        puts "IP folder doesn't exist.\n"
+        puts "\nRECREATING_PROCESSINFO  IP folder doesn't exist.\n"
+    }
+
+    # testbench is being added
+    if { [ file exists $tb_repository ] == 1 } {
+
+        set tb_list [glob -nocomplain $tb_repository/*.{v,sv,vh}]
+
+        if {[string equal [lindex $tb_list 0] ""]} {
+
+            puts "RECREATING_PROCESSINFO    There is no testbench file in src directory.\n"
+
+        } else {
+
+            foreach tb $tb_list {
+                add_files -fileset sim_1 $tb
+                puts "\nRECREATING_PROCESSINFO  $tb is added.\n"
+            }
+        }
+    } else {
+
+        puts "\nRECREATING_PROCESSINFO  Testbench folder doesn't exist.\n"
+    }
+
+    # constraint file (.xdc) is being added
+    if { [ file exists $xdc_repository ] == 1 } {
+
+        set xdc_list [glob -nocomplain $xdc_repository/*.xdc]
+
+        if {[string equal [lindex $xdc_list 0] ""]} {
+
+            puts "RECREATING_PROCESSINFO    There is no constraints file (.xdc) in src directory.\n"
+
+        } else {
+
+            foreach xdc $xdc_list {
+                add_files -fileset constrs_1 $xdc
+                puts "\nRECREATING_PROCESSINFO  $xdc is added.\n"
+            }
+        }
+    } else {
+
+        puts "\nRECREATING_PROCESSINFO  Constraints folder doesn't exist.\n"
     }
 
 
+
+
 update_ip_catalog
+
+puts "\nRECREATING_PROCESSINFO  Recreate project is done. \n"
+
+close_project
 
