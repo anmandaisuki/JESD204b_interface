@@ -8,12 +8,12 @@ module jesd204b_rx_con #(
         // input to gtwizardIP
 
             // To transceiver Primitive
-            output wire o_rx8b10ben,
             output wire o_rxcommadeten, // comma detect enable
-            output wire o_rxpcommaalignen,
-            output wire o_rxmcommaalignen,
-            output wire o_rxusrclk,
-            output wire o_rxusrclk2,
+            input wire i_rx8b10ben,
+            input wire i_rxpcommaalignen,
+            input wire i_rxmcommaalignen,
+            input wire i_rxusrclk,
+            input wire i_rxusrclk2,
 
             // To Helper (not directly transceiver Primitive)
             
@@ -42,7 +42,7 @@ wire [127:0]gtwiz_userdata_rx_out;
 wire gtrefclk00_in; // 100MHz
 
 // comma detection process
-    wire [3:0] rx8b10ben_in;
+    wire [3 : 0] rx8b10ben_in;
     wire [3 : 0] rxcommadeten_in;
     wire [3 : 0] rxmcommaalignen_in;
     wire [3 : 0] rxpcommaalignen_in;
@@ -86,7 +86,7 @@ gtwizard_ultrascale_0 gty_inst (
   .qpll0outrefclk_out(qpll0outrefclk_out),                                  // not necessary
   .gtyrxn_in(gtyrxn_in),                                                    // 
   .gtyrxp_in(gtyrxp_in),                                                    // 
-  .rx8b10ben_in(rx8b10ben_in),                                              // 
+  .rx8b10ben_in(1'b1),                                                      // 1
   .rxcommadeten_in(rxcommadeten_in),                                        // 
   .rxmcommaalignen_in(rxmcommaalignen_in),                                  // 
   .rxpcommaalignen_in(rxpcommaalignen_in),                                  // 

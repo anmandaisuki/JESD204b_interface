@@ -5,7 +5,7 @@
 * RXUSERDY: gtwizardIPを初期化とかでResetするためにHighにする必要あり。
 * RXUSRCLK2: user側のパラレルインターフェイス用のクロック。RXDATAを読むときの同期クロックになる。RXDATAの幅とINT_Datawidth、RXUSRCLKによって決まる。[(GTH,table4-53参照)](http://padley.rice.edu/cms/OH_GE21/UG476_7Series_Transceivers.pdf)
 * RXUSRCLK : レシーバのPCSに供給するクロック。F=LineRate/Int_DataWidthで供給周波数を求めることができる。
-    * ex) LineRate=8Gbpsのとき、DataWidthは64bitなので、8000/64=125Mhzのクロックを供給する必要がある。Int_DataWidthは2byteか4byteで6.6Gbpsのときは必ず4byte。
+    * ex) LineRate=10Gbpsで、8b10bが有効ならDataWidthは80bitなので、10000/80=125Mhzのクロックを供給する必要がある。LineRateが6.6Gbps以上のときはDataWidthは64bit(80bit:8b10b有効なとき)。
 [(GTH,詳しくはUG476、p297みて)](http://padley.rice.edu/cms/OH_GE21/UG476_7Series_Transceivers.pdf)
 [(GTY,p304)](https://docs.xilinx.com/v/u/ja-JP/ug578-ultrascale-gty-transceivers)
 
@@ -22,7 +22,7 @@
 1. freerun_clk : PLLの初期化とか用クロック。100MHzくらいでいい。Wizard上で設定。
 1. gtrefclk00_in: 00-11まである。commonプリミティブ。wizardでtxかrx側のPLLをQPLL0/1に設定してると存在する。(Basic > Transmitter/Receiver > PLL type)
 1. gtrefclk0_in/gtrefclk1 : channelプリミティブへの供給クロック。wizardでtxかrx側のPLLをCPLLに設定してると存在する。(Basic > Transmitter/Receiver > PLL type)
-1. USRCLK   : PCSの動作クロック。F=LineRate/Int_DataWidth
+1. USRCLK   : PCSの動作クロック。F=LineRate/Int_DataWidth(RX_DATA_WIDTHの値。8b10bENなら20,40,80)
 1. USRCLK2  : User側のパラレルインターフェイスのクロック。gtwiz_userdata_rx_outの同期クロック。
 1. 
 
