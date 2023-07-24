@@ -9,7 +9,7 @@ module jesd204b_lmfc_generator #(
 
     output wire o_lmfc,
     output wire[LMFC_CNT_WIDTH-1:0] o_lmfc_cnt,
-    output wire o_sysref_done,
+    output wire o_sysref_done
 );
 
 reg[LMFC_CNT_WIDTH:0] lmfc_cnt_double = 0;
