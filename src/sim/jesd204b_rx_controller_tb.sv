@@ -2,15 +2,12 @@
 
 module jesd204b_rx_controller_tb ();
 
-// Instance Parameter
-    localparam GTY_NUM = 1;
+localparam LINE_RATE_PS = 50  ;  // 50 ps => 10 GHz. ( = 1000 /(50ps * 2))
+localparam DCLK_RATE_PS = 2000;  // 2000 ps => 250 MHz ( 0.25 GHz = 1000 / (2000ps * 2) )
+localparam FREERUN_RATE_PS = 2000;
 
-localparam LINE_RATE = 11;   //GHz
-localparam DCLK_FREQ = 200;   //MHz 
-
-localparam SYSREF_START = 25000000;
+localparam SYSREF_START = 50000000;
 localparam INIT_PROCESS_START = 100; // ns
-
 
 localparam FMLC_CNT_WIDTH = 8;
 
@@ -20,67 +17,36 @@ wire io_nsync,o_data_clk,o_data_from_transceiver;
 assign gty_rxn =! gty_rxp;
 
 reg dclk = 1'b0;
+reg freerunclk = 1'b0;
+
 reg i_sysref = 1'b0;
 
 task init_dclk();
  begin
     dclk = 1'b0;
     i_sysref = 1'b0;
-//    #(10000);
-    forever #((500/DCLK_FREQ)*1000) dclk =! dclk; 
+    forever #(DCLK_RATE_PS) dclk =! dclk; 
+ end
+endtask
+
+task init_freerunclk();
+ begin
+    freerunclk = 1'b0;
+    i_sysref = 1'b0;
+    forever #(FREERUN_RATE_PS) freerunclk =! freerunclk; 
  end
 endtask
 
 reg [9:0] K285_p = 10'b0101111100;
-//reg [9:0] K285_p = 10'b0011111010;
 reg [9:0] K285_n = 10'b1010000011;
-//reg [9:0] K285_n = 10'b1100000101;
-
-//reg [9:0] K285_p = 10'b0000000001;
-//reg [9:0] K285_p = 10'b1111111110;
-//reg [9:0] K285_n = 10'b1111111111;
-//reg [9:0] K285_n = 10'b0000000000;
-
-//reg [19:0] K285_both = {K285_p,K285_n};
-//reg [19:0] K285_both = 20'b10100000111010000011;
-//reg [19:0] K285_both = 20'b00000000010000000001;
-//reg [19:0] K285_both = 20'b00000000110000000000;
-reg [19:0] K285_both = 20'b10100000110101111100;
-
-task send_initializing_sequence();
-    begin
-        #(INIT_PROCESS_START);
-    //    forever begin
-    //         #(1/LINE_RATE)  gty_rxp = K285_p[0];
-    //         #(1/LINE_RATE)  gty_rxp = K285_p[1];
-    //         #(1/LINE_RATE)  gty_rxp = K285_p[2];
-    //         #(1/LINE_RATE)  gty_rxp = K285_p[3];
-    //         #(1/LINE_RATE)  gty_rxp = K285_p[4];
-    //         #(1/LINE_RATE)  gty_rxp = K285_p[5];
-    //         #(1/LINE_RATE)  gty_rxp = K285_p[6];
-    //         #(1/LINE_RATE)  gty_rxp = K285_p[7];
-    //         #(1/LINE_RATE)  gty_rxp = K285_p[8];
-    //         #(1/LINE_RATE)  gty_rxp = K285_p[9];
-    //         #(1/LINE_RATE)  gty_rxp = K285_n[0];
-    //         #(1/LINE_RATE)  gty_rxp = K285_n[1];
-    //         #(1/LINE_RATE)  gty_rxp = K285_n[2];
-    //         #(1/LINE_RATE)  gty_rxp = K285_n[3];
-    //         #(1/LINE_RATE)  gty_rxp = K285_n[4];
-    //         #(1/LINE_RATE)  gty_rxp = K285_n[5];
-    //         #(1/LINE_RATE)  gty_rxp = K285_n[6];
-    //         #(1/LINE_RATE)  gty_rxp = K285_n[7];
-    //         #(1/LINE_RATE)  gty_rxp = K285_n[8];
-    //         #(1/LINE_RATE)  gty_rxp = K285_n[9];
-    //    end
-    end
-endtask
+reg [19:0] K285_both = {K285_p,K285_n};
 
 reg lane_clk;
 reg [4:0]K28_cnt = 0;
 initial begin
     lane_clk = 1'b0;
-//    #(30);
-    forever #(500/LINE_RATE) lane_clk =! lane_clk;
+    #(10);
+    forever #(LINE_RATE_PS) lane_clk =! lane_clk;
 end
 
 always @(posedge lane_clk) begin
@@ -93,31 +59,30 @@ always @(posedge lane_clk) begin
     end
 end
 
-
 initial begin 
     fork
         init_dclk();
-        send_initializing_sequence();
+        init_freerunclk();
     join_none
     
     #(SYSREF_START);
     i_sysref = 1'b1;
-    #((500/DCLK_FREQ)*10000);
+    #(DCLK_RATE_PS * 10);
     i_sysref = 1'b0;
     #(1000);
 //    $finish;
 end
 
-jesd204b_rx_controller #(
+jesd204b_rx_controller_comma #(
     .DIV_DCLK  (4),   
     .FRAME_SIZE(1),   
-    .FMLC_NUM  (8),   
-    .GTY_NUM   (GTY_NUM)   
+    .FMLC_NUM  (8)
 ) jesd_rx_controller_inst(
     // External for Transceiver
     .i_gtyrxn_in(gty_rxn),
     .i_gtyrxp_in(gty_rxp),
     .i_gtrefclk00_in(dclk),
+    . i_freerunclk(freerunclk), 
 
     // External for JESD204B core
     .io_nsync(io_nsync),
